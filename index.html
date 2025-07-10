@@ -9,7 +9,7 @@
   </style>
 </head>
 <body>
-  <div id="message" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 8px; z-index: 10; display: none;"></div>
+  <div id="message" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 8px; z-index: 10; display: block;">Loading AR app...</div>
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
     import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
@@ -26,34 +26,42 @@
     function showMessage(msg) {
       messageDiv.textContent = msg;
       messageDiv.style.display = 'block';
+      console.log('MESSAGE:', msg);
     }
     function hideMessage() {
       messageDiv.style.display = 'none';
+      console.log('MESSAGE HIDDEN');
     }
 
     function init() {
+      showMessage('Loading AR app...');
       if (!navigator.xr) {
         showMessage('WebXR is not supported on this device/browser.');
         return;
       }
       scene = new THREE.Scene();
+      console.log('Three.js scene created');
 
       camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+      console.log('Camera created');
 
       const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
       light.position.set(0.5, 1, 0.25);
       scene.add(light);
+      console.log('Light added');
 
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.xr.enabled = true;
       document.body.appendChild(renderer.domElement);
+      console.log('Renderer created and added to DOM');
 
       // ARButton with error handling
       const arButton = ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] });
       if (arButton.nodeName === 'BUTTON') {
         document.body.appendChild(arButton);
+        console.log('ARButton added');
       } else {
         showMessage('AR not supported or permissions denied.');
         return;
@@ -65,24 +73,29 @@
       reticle.matrixAutoUpdate = false;
       reticle.visible = false;
       scene.add(reticle);
+      console.log('Reticle added');
 
       controller = renderer.xr.getController(0);
       controller.addEventListener('select', onSelect);
       scene.add(controller);
+      console.log('Controller added');
 
       const loader = new GLTFLoader();
       loader.load('model.glb', function (gltf) {
         model = gltf.scene;
         model.scale.set(0.2, 0.2, 0.2);
         hideMessage();
+        console.log('Model loaded');
       }, undefined, function (error) {
         showMessage('Failed to load model.glb. Check the file and try again.');
-        console.error(error);
+        console.error('Model load error:', error);
       });
 
       window.addEventListener('resize', onWindowResize, false);
+      console.log('Resize event added');
 
       setupHitTest();
+      console.log('Hit test setup called');
     }
 
     function setupHitTest() {
