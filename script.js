@@ -3,7 +3,9 @@ let controller;
 let reticle;
 let model = null;
 
-init();
+window.onload = () => {
+  init();
+};
 
 function init() {
   scene = new THREE.Scene();
